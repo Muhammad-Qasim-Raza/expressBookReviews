@@ -15,6 +15,21 @@ public_users.get('/api/books', (req, res) => {
 });
 
 
+// Internal book by ISBN endpoint
+public_users.get('/api/books/:isbn', (req, res) => {
+  const isbn = req.params.isbn;
+  const book = books[isbn];
+
+  if (!book) {
+    return res.status(404).json({
+      message: "Book not found"
+    });
+  }
+
+  return res.status(200).json(book);
+});
+
+
 // Register a new user
 public_users.post("/register", (req, res) => {
   const username = req.body.username;
@@ -66,20 +81,18 @@ public_users.get('/isbn/:isbn', async (req, res) => {
     const isbn = req.params.isbn;
 
     const response = await axios.get(
-      'http://localhost:5000/api/books'
+      `http://localhost:5000/api/books/${isbn}`
     );
 
-    const book = response.data[isbn];
+    return res.status(200).json(response.data);
 
-    if (!book) {
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
       return res.status(404).json({
         message: "Book not found"
       });
     }
 
-    return res.status(200).json(book);
-
-  } catch (error) {
     return res.status(500).json({
       message: "Error retrieving book"
     });
